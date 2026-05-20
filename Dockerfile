@@ -88,6 +88,9 @@ COPY --chown=hermes:hermes . .
 RUN cd web && npm run build && \
     cd ../ui-tui && npm run build
 
+# Pre-install WhatsApp bridge dependencies so there is no runtime npm install.
+RUN cd scripts/whatsapp-bridge && npm install --prefer-offline --no-audit --legacy-peer-deps
+
 # ---------- Permissions ----------
 # Make install dir world-readable so any HERMES_UID can read it at runtime.
 # The venv needs to be traversable too.
@@ -102,7 +105,7 @@ RUN cd web && npm run build && \
 # fail to load.  See tools/lazy_deps.py.
 USER root
 RUN chmod -R a+rX /opt/hermes && \
-    chown -R hermes:hermes /opt/hermes/.venv /opt/hermes/ui-tui /opt/hermes/node_modules
+    chown -R hermes:hermes /opt/hermes/.venv /opt/hermes/ui-tui /opt/hermes/node_modules /opt/hermes/scripts/whatsapp-bridge/node_modules
 # Start as root so the entrypoint can usermod/groupmod + gosu.
 # If HERMES_UID is unset, the entrypoint drops to the default hermes user (10000).
 

@@ -8,16 +8,23 @@ BUNDLED_DIR="/opt/hermes/docker/profiles/auto-parts"
 
 mkdir -p "$PROFILE_DIR"
 
-# Copy config.yaml if not already customised on the volume
-if [ ! -f "$PROFILE_DIR/config.yaml" ]; then
-    echo "[auto-parts] Installing config.yaml"
-    cp "$BUNDLED_DIR/config.yaml" "$PROFILE_DIR/config.yaml"
-fi
-
-# Always refresh SOUL.md from the image (it's not user-editable)
+# Always refresh config.yaml and SOUL.md from the image.
+# The docker entrypoint installs a generic default before this script runs,
+# so we must overwrite here to ensure the auto-parts profile is active.
+cp "$BUNDLED_DIR/config.yaml" "$PROFILE_DIR/config.yaml"
 cp "$BUNDLED_DIR/SOUL.md" "$PROFILE_DIR/SOUL.md"
 
 echo "[auto-parts] Profile bootstrap complete → $PROFILE_DIR"
+
+# Restore WhatsApp session from env var if set and session not already on volume.
+# WHATSAPP_CREDS_B64 holds a base64-encoded tar.gz of the Baileys session directory.
+WA_SESSION_DIR="$PROFILE_DIR/platforms/whatsapp/session"
+if [ -n "$WHATSAPP_CREDS_B64" ] && [ ! -f "$WA_SESSION_DIR/creds.json" ]; then
+    echo "[auto-parts] Restoring WhatsApp session from WHATSAPP_CREDS_B64"
+    mkdir -p "$WA_SESSION_DIR"
+    echo "$WHATSAPP_CREDS_B64" | base64 -d | tar -xz -C "$WA_SESSION_DIR"
+    echo "[auto-parts] WhatsApp session restored"
+fi
 
 # On Railway, use the assigned PORT for the dashboard so it's publicly reachable.
 # HERMES_DASHBOARD_PORT from env takes precedence; fall back to Railway's $PORT.

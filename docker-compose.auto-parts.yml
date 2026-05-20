@@ -47,6 +47,7 @@ services:
       - HERMES_DASHBOARD_HOST=127.0.0.1
       - HERMES_DASHBOARD_PORT=9119
       - WEB_AUTH_TOKEN=${WEB_AUTH_TOKEN}
+      - GATEWAY_ALLOW_ALL_USERS=${GATEWAY_ALLOW_ALL_USERS:-false}
     entrypoint: ["/bin/bash", "-c"]
     command:
       - |

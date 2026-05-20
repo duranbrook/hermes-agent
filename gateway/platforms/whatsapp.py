@@ -528,7 +528,7 @@ class WhatsAppAdapter(BasePlatformAdapter):
             self._set_fatal_error(
                 "whatsapp_not_paired",
                 "WhatsApp enabled but not paired — run `hermes whatsapp` to pair.",
-                retryable=False,
+                retryable=True,
             )
             return False
 
