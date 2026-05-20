@@ -306,6 +306,11 @@ TOOLSETS = {
         "includes": []
     },
 
+    "automotive": {
+        "description": "Automotive parts identification and lookup tools",
+        "tools": ["parts_lookup"],
+        "includes": []
+    },
 
     # Scenario-specific toolsets
     
