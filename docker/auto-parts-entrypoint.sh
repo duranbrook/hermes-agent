@@ -18,3 +18,9 @@ fi
 cp "$BUNDLED_DIR/SOUL.md" "$PROFILE_DIR/SOUL.md"
 
 echo "[auto-parts] Profile bootstrap complete → $PROFILE_DIR"
+
+# On Railway, use the assigned PORT for the dashboard so it's publicly reachable.
+# HERMES_DASHBOARD_PORT from env takes precedence; fall back to Railway's $PORT.
+if [ -n "$PORT" ] && [ -z "$HERMES_DASHBOARD_PORT" ]; then
+    export HERMES_DASHBOARD_PORT="$PORT"
+fi
