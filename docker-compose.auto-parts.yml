@@ -1,0 +1,54 @@
+#
+# Local development stack for the auto-parts Hermes profile.
+#
+# Usage:
+#   cp .env.auto-parts.example .env.auto-parts
+#   # edit .env.auto-parts and fill in ANTHROPIC_API_KEY and WEB_AUTH_TOKEN
+#   HERMES_UID=$(id -u) HERMES_GID=$(id -g) docker compose -f docker-compose.auto-parts.yml up
+#
+# Services:
+#   parts-api   — hermes-auto-parts-api FastAPI service (mock DB, port 8000)
+#   gateway     — Hermes with auto-parts profile (WhatsApp, port 3000 for bridge)
+#   dashboard   — Hermes web dashboard (port 9119)
+#
+# WhatsApp setup: watch gateway logs for the QR code, scan with your WhatsApp account.
+# Dashboard:      open http://localhost:9119 in your browser.
+#
+
+services:
+  parts-api:
+    build:
+      context: ../hermes-auto-parts-api
+    container_name: hermes-auto-parts-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PARTS_DB_BACKEND=mock
+      - PORT=8000
+
+  gateway:
+    build: .
+    image: hermes-agent
+    container_name: hermes-auto-parts
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      - parts-api
+    volumes:
+      - ~/.hermes/profiles/auto-parts:/opt/data
+    environment:
+      - HERMES_UID=${HERMES_UID:-10000}
+      - HERMES_GID=${HERMES_GID:-10000}
+      - HERMES_HOME=/opt/data
+      - PARTS_API_URL=http://localhost:8000
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - HERMES_DASHBOARD=1
+      - HERMES_DASHBOARD_HOST=127.0.0.1
+      - HERMES_DASHBOARD_PORT=9119
+      - WEB_AUTH_TOKEN=${WEB_AUTH_TOKEN}
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        bash /opt/hermes/docker/auto-parts-entrypoint.sh
+        exec /opt/hermes/docker/entrypoint.sh gateway run
