@@ -46,12 +46,15 @@ WhatsApp Group
 
 ## Trigger Conditions
 
-The agent responds only when **all three** are present in a WhatsApp message:
-1. A photo attachment
-2. A VIN number (text)
-3. An explicit request to find / identify the part
+The agent responds based on **context**, not a rigid checklist. The SOUL.md instructs the agent to use judgment:
 
-A photo alone, a VIN alone, or a VIN + photo without a request does not trigger a lookup.
+- A photo + "what part is this?" → agent identifies the part, attempts lookup
+- A VIN + part name in text → agent skips vision, goes straight to lookup
+- A photo + VIN + "find me this part" → full flow (vision + VIN + DB/web)
+- A general automotive question (no photo, no VIN) → agent answers from LLM knowledge or web search
+- An ambiguous message → agent asks a clarifying question before acting
+
+The agent does not trigger on non-automotive messages in the chat.
 
 ---
 
@@ -185,8 +188,24 @@ Real database implementations (MySQL, REST catalog API, etc.) implement `PartsDB
 
 - Backend: `whatsapp-web.js` (personal account, no Meta approval required)
 - On first deploy: Hermes prints a QR code in logs — scan with the bot's WhatsApp account
-- The bot listens to the configured group only (set via `gateway.platforms.whatsapp.home_group`)
+- The bot responds in **both group chats and individual DMs** — no restriction to a single group
 - Session persists in Railway volume so re-auth isn't needed on redeploy
+
+---
+
+## Web Dashboard
+
+Hermes ships a built-in web UI (`hermes web`, default port 9119). The `hermes-auto-parts` Railway service exposes this as a second public port so you can monitor the agent from a browser.
+
+**What the dashboard shows (built-in):**
+- Session history (all WhatsApp conversations)
+- Gateway status (WhatsApp connection state, QR code on first auth)
+- Config editor (toolset, model, etc.)
+- Logs viewer
+
+**Access:** Railway will assign a public URL to port 9119 on the `hermes-auto-parts` service. Protect it with Hermes's built-in dashboard auth (set `WEB_AUTH_TOKEN` env var).
+
+**Optional later:** A custom "Auto Parts" tab (Hermes dashboard plugin) could show lookup history, part hit rates, and DB adapter status in a single view.
 
 ---
 
@@ -202,7 +221,6 @@ Real database implementations (MySQL, REST catalog API, etc.) implement `PartsDB
 
 ## Out of Scope
 
-- Multi-group support (one group only for now)
 - User authentication / authorization within WhatsApp
 - Parts ordering or purchasing
 - Image generation or video
