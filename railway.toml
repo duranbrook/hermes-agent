@@ -3,8 +3,8 @@ builder = "dockerfile"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Run the profile bootstrap, then start the Hermes gateway
-startCommand = "bash /opt/hermes/docker/auto-parts-entrypoint.sh && exec hermes gateway run"
+# Bootstrap profile, start dashboard on Railway's PORT, then start gateway
+startCommand = "source /opt/hermes/.venv/bin/activate && bash /opt/hermes/docker/auto-parts-entrypoint.sh && hermes dashboard --host 0.0.0.0 --port ${PORT:-9119} --no-open --insecure & exec hermes gateway run"
 restartPolicyType = "on_failure"
 
 [[services]]
