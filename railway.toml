@@ -1,0 +1,13 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Run the profile bootstrap, then start the Hermes gateway
+startCommand = "bash /opt/hermes/docker/auto-parts-entrypoint.sh && exec hermes gateway run"
+healthcheckPath = "/health"
+healthcheckTimeout = 60
+restartPolicyType = "on_failure"
+
+[[services]]
+name = "hermes-auto-parts"
