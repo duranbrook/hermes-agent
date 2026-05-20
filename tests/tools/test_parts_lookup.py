@@ -18,9 +18,6 @@ def test_parts_lookup_returns_part_when_api_succeeds():
 
     with patch.dict(os.environ, {"PARTS_API_URL": "http://test.internal"}):
         with patch("tools.parts_lookup.httpx.post", return_value=mock_response):
-            import importlib
-            import tools.parts_lookup
-            importlib.reload(tools.parts_lookup)
             from tools.parts_lookup import parts_lookup
             result_str = parts_lookup("front brake caliper single piston", "1HGBH41JXMN109186")
 

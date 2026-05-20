@@ -47,8 +47,10 @@ def parts_lookup(part_description: str, vin: str) -> str:
         )
         resp.raise_for_status()
         return json.dumps(resp.json(), ensure_ascii=False)
+    except httpx.TimeoutException:
+        return tool_error("Parts API timed out — service may be slow, try again")
     except httpx.HTTPStatusError as exc:
-        return tool_error(f"Parts API returned {exc.response.status_code}: {exc.response.text[:200]}")
+        return tool_error(f"Parts API returned {exc.response.status_code}: {(exc.response.text or '')[:200]}")
     except Exception as exc:
         return tool_error(f"Parts API unreachable: {exc}")
 
