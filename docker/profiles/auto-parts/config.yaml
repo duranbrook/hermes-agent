@@ -1,0 +1,27 @@
+# Auto-parts profile configuration
+# HERMES_HOME=/opt/data/profiles/auto-parts
+
+model:
+  default: "anthropic/claude-sonnet-4-6"
+  provider: "anthropic"
+
+# Only WhatsApp — no other platforms
+platforms:
+  whatsapp:
+    enabled: true
+    extra:
+      bridge_script: "/opt/hermes/scripts/whatsapp-bridge/bridge.js"
+      bridge_port: 3000
+      dm_policy: "open"
+      group_policy: "open"
+
+# Lean toolset: web + terminal + file + automotive (no image gen, no kanban, no video)
+platform_toolsets:
+  whatsapp: [web, terminal, file, vision, skills, todo, automotive]
+
+# Disable all background services not needed
+curator:
+  enabled: false
+
+kanban:
+  dispatch_in_gateway: false
